@@ -19,6 +19,8 @@ class Interface(object):
         self.evManager = evManager
         evManager.RegisterListener(self)
         self.model = model
+
+        self.is_initAI = False
     
     def notify(self, event):
         """
@@ -41,24 +43,30 @@ class Interface(object):
                 self.evManager.Post(Event_Move(player.index, AI_Dir))
         
     def initialize(self):
+        if self.is_initAI:
+            return
+        self.is_initAI = True
         for index, player in enumerate(self.model.players):
             if player.name == "manual":
                     continue
             # load TeamAI .py file
             try:
-                loadtmp = imp.load_source('', './AI/team_' + player.name + '.py')
+                loadtmp = imp.load_source('', './AI/team_'+ player.name +'.py')
             except:
-                print( "player:["+ str(index) +"]team_"+ player.name +"'s AI can't load." )
+                self.loadmsg( str(index), player.name, "AI can't load")
                 player.name, player.is_AI, player.ai= "Error" , False, None
                 continue
-            print("Load ["+ str(index) +"]team_" + player.name + ".py")
+            self.loadmsg( str(index), player.name, "Loading")
             # init TeamAI class
             try:
                 player.ai = loadtmp.TeamAI( Helper(self.model, index) )
             except:
-                print( "player:["+ str(index) +"]team_"+ player.name +"'s AI __init__ is crashed." )
+                self.loadmsg( str(index), player.name, "AI init crashed")
                 traceback.print_exc()
                 player.name, player.is_AI, player.ai= "Error" , False, None
                 continue
-            print("Successful to Load ["+ str(index) +"]team_" + player.name + ".py")
+            self.loadmsg( str(index), player.name, "Successful to Load")
+
+    def loadmsg(self, index, name ,msg):
+        print("["+ str(index) +"] team_" + name + ".py: "+ msg)
     

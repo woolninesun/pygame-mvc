@@ -80,59 +80,6 @@ class Event_Move(BaseEvent):
     def __str__(self):
         return "{0} => Playerindex={1}, DirectionTo:{2}".format(self.name, self.PlayerIndex, self.Direction)
 
-class Event_ModeChange(BaseEvent):
-    """
-    Mode change event.
-    """
-    def __init__(self, player):
-        self.name = "ModeChange event"
-        self.PlayerIndex = player
-    def __str__(self):
-        return "{0} => Playerindex={1}".format(self.name, self.PlayerIndex)
-
-class Event_SkillCard(BaseEvent):
-    """
-    SkillCard event.
-    """
-    def __init__(self,player,skill):
-        self.name = "SkillCard event"
-        self.PlayerIndex = player
-        self.SkillIndex = skill
-    def __str__(self):
-        return "{0} => Playerindex={1}, SkillIndex={2}".format(self.name, self.PlayerIndex, self.SkillIndex)
-
-class Event_Action(BaseEvent):
-    """
-    Action event.
-    """
-    def __init__(self, player, action):
-        self.name = "Action event"
-        self.PlayerIndex = player
-        self.ActionIndex = action
-    def __str__(self):
-        return "{0} => Playerindex={1}, ActionIndex={2}".format(self.name, self.PlayerIndex, self.ActionIndex)
-
-class Event_ConfirmAction():
-    """
-    Confirm action event.
-    """
-    def __init__(self, player, action):
-        self.name = "ConfirmAction event"
-        self.PlayerIndex = player
-        self.ActionIndex = action
-    def __str__(self):
-        return "{0} => Playerindex={1}, ActionIndex={2}".format(self.name, self.PlayerIndex, self.ActionIndex)
-
-class Event_CallMe():
-    """
-    CallMe event
-    """
-    def __init__(self,PlayerIndex):
-        self.name = "CallMe event"
-        self.PlayerIndex = PlayerIndex 
-    def __str__(self):
-        return "Call me maybe"
-
 class EventManager(object):
     """
     We coordinate communication between the Model, View, and Controller.

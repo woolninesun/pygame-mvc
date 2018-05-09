@@ -45,10 +45,13 @@ class GameEngine(object):
                 self.UpdateObjects()
         elif isinstance(event, Event_StateChange):
             # if event.state is None >> pop state.
-            if not event.state:
+            if event.state == None:
                 # false if no more states are left
                 if not self.state.pop():
                     self.evManager.Post(Event_Quit())
+            elif event.state == STATE_RESTART:
+                self.state.clear()
+                self.state.push(STATE_MENU)
             else:
                 # push a new state on the stack
                 self.state.push(event.state)
@@ -56,14 +59,17 @@ class GameEngine(object):
             self.SetPlayerDirection(event.PlayerIndex, event.Direction)
         elif isinstance(event, Event_Quit):
             self.running = False
-        elif isinstance(event, Event_Initialize):
-            self.SetPlayer()
+        elif isinstance(event, Event_Initialize) or \
+             isinstance(event, Event_Restart):
+            self.Initialize()
 
+    def Initialize(self):
+        self.SetPlayer()
 
     def SetPlayer(self):
         # set AI Names List
         # "_" ==> default AI, "~" ==> manual player
-        ManualPlayerNum = 0
+        self.players, ManualPlayerNum = [], 0
         for index in range(modelConst.PlayerNum):
             if len(self.AINames) > index:
                 PlayerName = self.AINames[index]

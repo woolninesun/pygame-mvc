@@ -20,6 +20,8 @@ class Interface(object):
         evManager.RegisterListener(self)
         self.model = model
 
+        self.playerAI = {}
+
         self.is_initAI = False
     
     def notify(self, event):
@@ -32,19 +34,18 @@ class Interface(object):
                 self.API_play()
         elif isinstance(event, Event_Quit):
             pass
-        elif isinstance(event, Event_Initialize) or \
-             isinstance(event, Event_Restart):
+        elif isinstance(event, Event_Initialize):
             self.initialize()
     
     def API_play(self):
         for player in self.model.players:
             if player.is_AI:
-                AI_Dir = player.ai.decide()
+                AI_Dir = self.playerAI[player.index].decide()
                 self.evManager.Post(Event_Move(player.index, AI_Dir))
         
     def initialize(self):
-        if self.is_initAI:
-            return
+        if self.is_initAI: return
+
         self.is_initAI = True
         for index, player in enumerate(self.model.players):
             if player.name == "manual":
@@ -59,7 +60,7 @@ class Interface(object):
             self.loadmsg( str(index), player.name, "Loading")
             # init TeamAI class
             try:
-                player.ai = loadtmp.TeamAI( Helper(self.model, index) )
+                self.playerAI[player.index] = loadtmp.TeamAI( Helper(self.model, index) )
             except:
                 self.loadmsg( str(index), player.name, "AI init crashed")
                 traceback.print_exc()

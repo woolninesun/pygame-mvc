@@ -10,7 +10,7 @@ class player(object):
         self.ai = None
         self.color = [ random.randint(0,255) for _ in range(3) ]
 
-        self.pos = [ 400, 400 ]
+        self.pos = [ random.randint(20,780), random.randint(20,780) ]
         self.direction = 1
 
     def UpdatePos(self):

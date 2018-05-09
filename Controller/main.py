@@ -64,7 +64,7 @@ class Control(object):
         """
         if event.type == pg.KEYDOWN:
             # space, enter or escape pops help
-            if event.key in [pg.K_ESCAPE, pg.K_p ]:
+            if event.key in [pg.K_ESCAPE, pg.K_SPACE ]:
                 self.evManager.Post(Event_StateChange(None))
 
     def ctrl_play(self, event):

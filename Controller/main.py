@@ -21,6 +21,8 @@ class Control(object):
         evManager.RegisterListener(self)
         self.model = model
 
+        self.SecEventType = pg.USEREVENT
+
     def notify(self, event):
         """
         Receive events posted to the message queue. 
@@ -77,10 +79,9 @@ class Control(object):
 
     def initialize(self):
         """
-        init pygame event and set timer
-        
-        # Document
-        pg.event.Event(event_id)
-        pg.time.set_timer(event_id, TimerDelay)
+        # init pygame event and set timer
+        # # Document
+        # pg.event.Event(event_id)
+        # pg.time.set_timer(event_id, TimerDelay)
         """
-        pass
+        pg.time.set_timer(self.SecEventType, 1000)

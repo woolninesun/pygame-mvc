@@ -21,6 +21,8 @@ class Control(object):
         evManager.RegisterListener(self)
         self.model = model
 
+        self.ControlKeys = {}
+
         self.SecEventType = pg.USEREVENT
 
     def notify(self, event):
@@ -73,9 +75,32 @@ class Control(object):
             # escape pops the menu
             if event.key == pg.K_ESCAPE:
                 self.evManager.Post(Event_StateChange(None))
-            # key p to stop the game
-            elif event.key == pg.K_p:    
+                self.evManager.Post(Event_Restart())
+            # space to stop the game
+            elif event.key == pg.K_SPACE:    
                 self.evManager.Post(Event_StateChange(model.STATE_STOP))
+            # player controler
+            for player in self.model.players:
+                if player.is_AI:
+                    continue
+                DirKeys = self.ControlKeys[player.index][0:4]
+                if event.key in DirKeys:
+                    NowPressedKeys = self.Get_KeyPressIn(DirKeys)
+                    DirHashValue = self.Get_DirHashValue(NowPressedKeys, DirKeys)
+                    if ctrlConst.DirHash[DirHashValue] != 0:
+                        self.evManager.Post(
+                            Event_Move( player.index, ctrlConst.DirHash[DirHashValue] )
+                        )
+        
+    def Get_KeyPressIn(self, keylist):
+        return [key for key, value in enumerate(pg.key.get_pressed()) if value == 1 and key in keylist]
+
+    def Get_DirHashValue(self, PressList, DirKeyList):
+        HashValue = 0
+        for index, key in enumerate(DirKeyList):
+            if key in PressList:
+                HashValue += 2**index
+        return HashValue
 
     def initialize(self):
         """
@@ -85,3 +110,10 @@ class Control(object):
         # pg.time.set_timer(event_id, TimerDelay)
         """
         pg.time.set_timer(self.SecEventType, 1000)
+
+        NowManualIndex = 0
+        for index, AIName in enumerate(self.model.AINames):
+            if AIName == "~":
+                self.ControlKeys[index] = \
+                    ctrlConst.ManualPlayerKeys[NowManualIndex]
+                NowManualIndex += 1

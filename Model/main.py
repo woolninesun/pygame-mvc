@@ -39,7 +39,11 @@ class GameEngine(object):
         """
         Called by an event in the message queue. 
         """
-        if isinstance(event, Event_StateChange):
+        if isinstance(event, Event_EveryTick):
+            cur_state = self.state.peek()
+            if cur_state == STATE_PLAY:
+                self.UpdateObjects()
+        elif isinstance(event, Event_StateChange):
             # if event.state is None >> pop state.
             if not event.state:
                 # false if no more states are left
@@ -48,6 +52,8 @@ class GameEngine(object):
             else:
                 # push a new state on the stack
                 self.state.push(event.state)
+        elif isinstance(event, Event_Move):
+            self.SetPlayerDirection(event.PlayerIndex, event.Direction)
         elif isinstance(event, Event_Quit):
             self.running = False
         elif isinstance(event, Event_Initialize):
@@ -82,6 +88,18 @@ class GameEngine(object):
             else:
                 Tmp_P = player(self.AINames[index], index, True)
             self.players.append(Tmp_P)
+
+    def SetPlayerDirection(self, playerIndex, direction):
+        if self.players[playerIndex] != None:
+            player = self.players[playerIndex]
+            player.direction = direction;
+
+
+    def UpdateObjects(self):
+        # Update players
+        for player in self.players:
+            player.UpdatePos()
+
 
     def run(self):
         """

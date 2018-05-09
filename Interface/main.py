@@ -37,7 +37,8 @@ class Interface(object):
     def API_play(self):
         for player in self.model.players:
             if player.is_AI:
-                player.ai.decide()
+                AI_Dir = player.ai.decide()
+                self.evManager.Post(Event_Move(player.index, AI_Dir))
         
     def initialize(self):
         for index, player in enumerate(self.model.players):

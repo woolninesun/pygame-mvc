@@ -73,14 +73,11 @@ class GraphicalView(object):
         """
         # draw backgound
         self.screen.fill(viewConst.Color_White)
-        # write some word
-        somewords = self.smallfont.render(
-                    'Play game!', 
-                    True, (0, 255, 0))
-        (SurfaceX, SurfaceY) = somewords.get_size()
-        pos_x = (viewConst.ScreenSize[0] - SurfaceX)/2
-        pos_y = (viewConst.ScreenSize[1] - SurfaceY)/2
-        self.screen.blit(somewords, (pos_x, pos_y))
+
+        for player in self.model.players:
+            pos = ( int(player.pos[0]), int(player.pos[1]) )
+            pg.draw.circle( self.screen, player.color, pos, 20 )
+
         # update surface
         pg.display.flip()
         

@@ -13,7 +13,7 @@ class GameEngine(object):
     """
     Tracks the game state.
     """
-    def __init__(self, evManager, AIList):
+    def __init__(self, evManager, AINames):
         """
         evManager (EventManager): Allows posting messages to the event queue.
 
@@ -21,7 +21,7 @@ class GameEngine(object):
             running (bool): True while the engine is online. Changed via Event_Quit().
             state (StateMachine()): control state change, stack data structure.
             AIList (list.str): all AI name list.
-            player (list.player()): all player object.
+            players (list.player()): all player object.
             TurnTo (int): current player
         """
         self.evManager = evManager
@@ -29,8 +29,8 @@ class GameEngine(object):
 
         self.running = False
         self.state = StateMachine()
-        self.AIList = AIList
-        self.player = []
+        self.AINames = AINames
+        self.players = []
         self.TurnTo = 0
 
         random.seed(time.time())
@@ -55,14 +55,33 @@ class GameEngine(object):
 
 
     def SetPlayer(self):
-        for i in range(modelConst.PlayerNum):
-            if self.AIList[i] != None:
-                Tmp_P = player(self.AIList[i])
-                Tmp_P.IS_AI = True
+        # set AI Names List
+        # "_" ==> default AI, "~" ==> manual player
+        ManualPlayerNum = 0
+        for index in range(modelConst.PlayerNum):
+            if len(self.AINames) > index:
+                PlayerName = self.AINames[index]
+                if PlayerName == "~":
+                    if ManualPlayerNum < modelConst.MaxManualPlayerNum:
+                        ManualPlayerNum += 1
+                    else:
+                        self.AINames[index] = "_"
             else:
-                Tmp_P = player("Default")
-                Tmp_P.IS_AI = False
-            self.player.append(Tmp_P)
+                if ManualPlayerNum < modelConst.MaxManualPlayerNum:
+                    ManualPlayerNum += 1
+                    self.AINames.append("~")
+                else:
+                    self.AINames.append("_")
+
+        # init Player object
+        for index in range(modelConst.PlayerNum):
+            if self.AINames[index] == "~":
+                Tmp_P = player("manual", index, False)
+            elif self.AINames[index] == "_":
+                Tmp_P = player("default", index, True)
+            else:
+                Tmp_P = player(self.AINames[index], index, True)
+            self.players.append(Tmp_P)
 
     def run(self):
         """

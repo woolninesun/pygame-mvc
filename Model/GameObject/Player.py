@@ -1,5 +1,6 @@
 class player(object):
-    def __init__(self, name):
+    def __init__(self, name, index, is_AI):
         self.name = name
-        self.IS_AI = False
+        self.is_AI = is_AI
+        self.index = index
         self.ai = None

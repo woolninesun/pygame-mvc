@@ -21,7 +21,7 @@ class GraphicalView(object):
         evManager.RegisterListener(self)
         self.model = model
 
-        self.isinitialized = False
+        self.is_initialized = False
         self.screen = None
         self.clock = None
         self.smallfont = None
@@ -30,7 +30,8 @@ class GraphicalView(object):
         """
         Receive events posted to the message queue. 
         """
-        if isinstance(event, Event_EveryTick) and self.isinitialized:
+        if isinstance(event, Event_EveryTick) \
+           and self.is_initialized:
             cur_state = self.model.state.peek()
             if cur_state == model.STATE_MENU:
                 self.render_menu()
@@ -44,7 +45,7 @@ class GraphicalView(object):
             self.clock.tick(viewConst.FramePerSec)
         elif isinstance(event, Event_Quit):
             # shut down the pygame graphics
-            self.isinitialized = False
+            self.is_initialized = False
             pg.quit()
         elif isinstance(event, Event_Initialize):
             self.initialize()
@@ -117,4 +118,4 @@ class GraphicalView(object):
         self.screen = pg.display.set_mode(viewConst.ScreenSize)
         self.clock = pg.time.Clock()
         self.smallfont = pg.font.Font(None, 40)
-        self.isinitialized = True
+        self.is_initialized = True

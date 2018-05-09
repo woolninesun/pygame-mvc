@@ -25,24 +25,30 @@ class Interface(object):
         Receive events posted to the message queue. 
         """
         if isinstance(event, Event_EveryTick):
-            self.API_play()
+            cur_state = self.model.state.peek()
+            if cur_state == model.STATE_PLAY:
+                self.API_play()
         elif isinstance(event, Event_Quit):
             pass
-        elif isinstance(event, Event_Initialize):
+        elif isinstance(event, Event_Initialize) or \
+             isinstance(event, Event_Restart):
             self.initialize()
     
     def API_play(self):
-        for player in self.model.player:
-            player.ai.decide()
+        for player in self.model.players:
+            if player.is_AI:
+                player.ai.decide()
         
     def initialize(self):
-        for index, player in enumerate(self.model.player):
+        for index, player in enumerate(self.model.players):
+            if player.name == "manual":
+                    continue
             # load TeamAI .py file
             try:
                 loadtmp = imp.load_source('', './AI/team_' + player.name + '.py')
             except:
                 print( "player:["+ str(index) +"]team_"+ player.name +"'s AI can't load." )
-                player.name, player.IS_AI, player.ai= "Error" , False, None
+                player.name, player.is_AI, player.ai= "Error" , False, None
                 continue
             print("Load ["+ str(index) +"]team_" + player.name + ".py")
             # init TeamAI class
@@ -51,7 +57,7 @@ class Interface(object):
             except:
                 print( "player:["+ str(index) +"]team_"+ player.name +"'s AI __init__ is crashed." )
                 traceback.print_exc()
-                player.name, player.IS_AI, player.ai= "Error" , False, None
+                player.name, player.is_AI, player.ai= "Error" , False, None
                 continue
             print("Successful to Load ["+ str(index) +"]team_" + player.name + ".py")
     

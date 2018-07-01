@@ -1,4 +1,4 @@
-PlayerNum = 4
+PlayerNum = 1
 MaxManualPlayerNum = 1
 
 #dir const

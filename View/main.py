@@ -25,8 +25,10 @@ class GraphicalView(object):
         self.screen = None
         self.clock = None
         self.smallfont = None
-
+        self.ballfont = None
+        self.scorefont = None
         self.last_update = 0
+
     
     def notify(self, event):
         """
@@ -63,7 +65,7 @@ class GraphicalView(object):
             # draw backgound
             self.screen.fill(viewConst.Color_Black)
             # write some word
-            somewords = self.smallfont.render(
+            somewords = self.smallfont.render( 
                         'You are in the Menu. Space to play. Esc exits.', 
                         True, (0, 255, 0))
             (SurfaceX, SurfaceY) = somewords.get_size()
@@ -81,13 +83,59 @@ class GraphicalView(object):
             self.last_update = model.STATE_PLAY
         # draw backgound
         self.screen.fill(viewConst.Color_White)
+        pg.draw.line(self.screen,viewConst.Color_Black,(800,100),(800,700)) #avoid overlapping rects
+        pg.draw.rect(self.screen,viewConst.Color_Red,(0,0,100,100),5)
+        pg.draw.rect(self.screen,viewConst.Color_Yellow,(700,0,100,100),5)
+        pg.draw.rect(self.screen,viewConst.Color_Blue,(0,700,100,100),5)
+        pg.draw.rect(self.screen, viewConst.Color_Green,(700, 700, 100, 100) , 5)
 
         for player in self.model.players:
             pos = ( int(player.pos[0]), int(player.pos[1]) )
-            pg.draw.circle( self.screen, player.color, pos, 20 )
+            pg.draw.circle(self.screen, player.color, pos, viewConst.playerRadius, 5)
+            
+            #draw scoreboard
+            pg.draw.rect(self.screen, player.color, (800, 200 * player.index, 480, 200), 5)
+            pg.draw.line(self.screen,viewConst.Color_Black,(800,200*player.index+100),(1280,200*player.index+100))
+            pg.draw.line(self.screen,viewConst.Color_Black,(960,200*player.index+100),(960,200*(player.index+1)))
+            pg.draw.line(self.screen, viewConst.Color_Black, (1120, 200 * player.index + 100), (1120, 200 * (player.index + 1)))
+            
+            #draw owned balls and their scores
+            for i,ball in enumerate(player.own_balls):
+                self.draw_ball(ball, (880 + 160 * i, 200 * player.index + 150))
+                somewords = self.ballfont.render(str(ball.score), True, (0, 0, 0))
+                (SurfaceX, SurfaceY) = somewords.get_size()
+                pos_x = 880 + 160 * i - SurfaceX/2
+                pos_y = 200 * player.index + 180 - SurfaceY/2
+                self.screen.blit(somewords, (pos_x, pos_y))
+            
+            #draw total scores
+            somewords = self.scorefont.render(str(player.score), True, (0, 0, 0))
+            (SurfaceX, SurfaceY) = somewords.get_size()
+            pos_x = 1040 - SurfaceX/2
+            pos_y = 200 * player.index + 50 - SurfaceY/2
+            self.screen.blit(somewords, (pos_x, pos_y))
+        
+        for ball in self.model.balls:
+            self.draw_ball(ball)
+            
 
         # update surface
         pg.display.flip()
+    
+    def draw_ball(self, ball, pos=None):
+        if not pos:
+            pos = ball.pos
+        pos=(int(pos[0]),int(pos[1]))
+        if ball.level == 'circle':
+            pg.draw.circle(self.screen, ball.color, pos, viewConst.ballRadius)
+        elif ball.level == 'triangle':
+            pg.draw.polygon(self.screen, ball.color, ((pos[0], pos[1] - viewConst.ballRadius),
+                                                        (pos[0] - viewConst.ballRadius, pos[1] + viewConst.ballRadius / 2),
+                                                        (pos[0] + viewConst.ballRadius, pos[1] + viewConst.ballRadius / 2)))
+        elif ball.level == 'square':
+            pg.draw.polygon(self.screen, ball.color, ((pos[0] - viewConst.ballRadius, pos[1] - viewConst.ballRadius), (pos[0] + viewConst.ballRadius, pos[1] - viewConst.ballRadius),
+                                                        (pos[0] + viewConst.ballRadius, pos[1] + viewConst.ballRadius), (pos[0] - viewConst.ballRadius, pos[1] + viewConst.ballRadius)))
+        
         
     def render_stop(self):
         """
@@ -128,4 +176,8 @@ class GraphicalView(object):
         self.screen = pg.display.set_mode(viewConst.ScreenSize)
         self.clock = pg.time.Clock()
         self.smallfont = pg.font.Font(None, 40)
+        self.ballfont = pg.font.Font(None, 40)
+        self.scorefont = pg.font.Font(None, 40)
         self.is_initialized = True
+
+

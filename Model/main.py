@@ -3,6 +3,7 @@ import time, random
 from Events.Manager import *
 from Model.StateMachine import *
 from Model.GameObject.Player import *
+from Model.GameObject.Ball import *
 
 import Model.const       as modelConst
 import View.const        as viewConst
@@ -32,6 +33,7 @@ class GameEngine(object):
         self.AINames = AINames
         self.players = []
         self.TurnTo = 0
+        self.balls = set()
 
         random.seed(time.time())
 
@@ -45,7 +47,7 @@ class GameEngine(object):
                 self.UpdateObjects()
         elif isinstance(event, Event_StateChange):
             # if event.state is None >> pop state.
-            if event.state == None:
+            if event.state is None:
                 # false if no more states are left
                 if not self.state.pop():
                     self.evManager.Post(Event_Quit())
@@ -65,6 +67,7 @@ class GameEngine(object):
 
     def Initialize(self):
         self.SetPlayer()
+        self.SetBall()
 
     def SetPlayer(self):
         # set AI Names List
@@ -98,14 +101,48 @@ class GameEngine(object):
     def SetPlayerDirection(self, playerIndex, direction):
         if self.players[playerIndex] != None:
             player = self.players[playerIndex]
-            player.direction = direction;
+            player.direction = direction
 
+    def SetBall(self):
+        for _ in range(5):
+            self.balls.add(Ball())
 
     def UpdateObjects(self):
         # Update players
         for player in self.players:
             player.UpdatePos()
-
+        # Update balls
+        for ball in self.balls:
+            ball.UpdatePos()
+        
+        #manage catch the ball and send balls to destination
+        for player in self.players:
+            for ball in self.balls:
+                if (player.pos[0] - ball.pos[0])** 2 + (player.pos[1] - ball.pos[1])** 2 \
+                    <= (viewConst.playerRadius + viewConst.ballRadius)** 2:
+                    if not player.full():
+                        player.own_balls.append(ball)
+                        self.calcBallScore(ball)
+                    self.balls.remove(ball)
+                    self.balls.add(Ball())
+            
+            for ball in player.own_balls:
+                if abs(player.pos[0] - viewConst.destination[ball.color][0]) <= viewConst.destination[ball.color][2] \
+                    and abs(player.pos[1] - viewConst.destination[ball.color][1]) <= viewConst.destination[ball.color][3]:
+                    player.score += ball.score
+                    player.own_balls.remove(ball)
+            
+        
+        
+        
+    def calcBallScore(self, ball):
+        destination = viewConst.destination[ball.color]
+        ball.score = int(abs(destination[0] - ball.pos[0]) + abs(destination[1] - ball.pos[1]))
+        if ball.level == 'triangle':
+            ball.score *= 2
+        elif ball.level == 'square':
+            ball.score *= 3
+        
 
     def run(self):
         """
